@@ -1,0 +1,5 @@
+name: 'add_fix_version'
+description: 'Add fix version to associated JIRA ticket'
+runs:
+  using: 'node16'
+  main: './.github/actions/addFixVersion.js'
