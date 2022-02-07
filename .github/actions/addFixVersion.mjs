@@ -29,7 +29,7 @@ const getReleaseVersions = async () => {
     method: 'GET',
     headers: {
       'Authorization': `Basic ${Buffer.from(
-        `${JIRA_EMAIL}:${JIRA_TOKEN}`
+        `${process.env.JIRA_EMAIL}:${process.env.JIRA_TOKEN}`
       ).toString('base64')}`,
       'Accept': 'application/json'
     }
