@@ -25,7 +25,7 @@ const getBranch = async (branch) => {
 };
 
 const getReleaseVersions = async () => {
-  const response = await fetch(`${JIRA_SERVER_URL}/rest/api/3/project/FY/version?status='unreleased'`, {
+  const response = await fetch(`${JIRA_SERVER_URL}/rest/api/3/project/FY/version?status=unreleased`, {
     method: 'GET',
     headers: {
       'Authorization': `Basic ${Buffer.from(
