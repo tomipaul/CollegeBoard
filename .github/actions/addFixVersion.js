@@ -26,7 +26,7 @@ const run = async () => {
   //     accept: 'application/vnd.github.v3+json'
   //   },
   // })
-  const response = await getBranch('master')
+  const response = await getBranch('dev')
   console.log('response', response)
 };
 
