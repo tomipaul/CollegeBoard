@@ -41,11 +41,11 @@ const getReleaseVersions = async () => {
 }
 
 const run = async () => {
-  const response = await getBranch('dev')
-  console.log('branch', response)
+  const branch = await getBranch('dev')
+  console.log('branch', branch)
 
-  const response = await getReleaseVersions()
-  console.log('release versions', response)
+  const releaseVersions = await getReleaseVersions()
+  console.log('release versions', releaseVersions)
 };
 
 run();
