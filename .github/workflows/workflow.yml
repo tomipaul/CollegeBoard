@@ -2,6 +2,8 @@ name: learn_github_action
 on:
   push:
     branches:
+      - master
+      - 'release-**'
       - 'test**'
 
 jobs:
@@ -12,6 +14,8 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
-      - run: npm install axios
+      - run: npm install @actions/github axios
       - run: node ./.github/actions/addFixVersion.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # - uses: ./.github/actions
