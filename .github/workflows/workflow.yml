@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: '16'
       - run: npm install @actions/github @actions/core node-fetch
-      - run: node ./.github/actions/addFixVersion.js
+      - run: node ./.github/actions/addFixVersion.js --input-type=module
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
