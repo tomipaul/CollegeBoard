@@ -67,7 +67,6 @@ const run = async () => {
   const event = github.context
   console.log('event', event.payload.commits)
   console.log(event.payload.commits.length)
-  console.log('just for the second test commit')
 
   const releaseVersions = await getUnreleasedVersions()
   console.log('release versions', releaseVersions)
