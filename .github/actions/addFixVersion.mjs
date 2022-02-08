@@ -65,7 +65,7 @@ const run = async () => {
   // const branch = await getBranch('dev')
   // console.log('branch', branch)
   const event = github.context
-  console.log('event', event)
+  console.log('event', event.payload.commits)
 
   const releaseVersions = await getUnreleasedVersions()
   console.log('release versions', releaseVersions)
