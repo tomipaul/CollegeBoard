@@ -40,17 +40,21 @@ const getBranch = async (branch) => {
   }
 };
 
-const getUnreleasedVersions = async () =>
-  await requestJira(
+const getUnreleasedVersions = async () => {
+  const response = await requestJira(
     '/project/FY/version?status=unreleased',
     'GET',
   )
+  return response.values
+}
 
-const getIssueFixVersion = async (issueKey) =>
-  await requestJira(
+const getIssueFixVersion = async (issueKey) => {
+  const response = await requestJira(
     `/issue/${issueKey}?fields=fixVersions`,
     'GET',
   )
+  return response.fields.fixVersions
+}
 
 const getCurrentStandardRelease = (releases) => {
   const currentStandardRelease = releases.find(({ name }) => /^release.*.0$/.test(name))
@@ -64,7 +68,7 @@ const run = async () => {
   const releaseVersions = await getUnreleasedVersions()
   console.log('release versions', releaseVersions)
 
-  const currentStandardRelease = getCurrentStandardRelease(releaseVersions.values)
+  const currentStandardRelease = getCurrentStandardRelease(releaseVersions)
   console.log('currentStandardRelease', currentStandardRelease)
 
   const issue = await getIssueFixVersion('FY-23471')
