@@ -20,7 +20,7 @@ const requestJira = async (url, method, body = undefined) => {
     },
   })
   if (response.ok) {
-    return await response.json();
+    return await response.text();
   }
   core.setFailed(`Action failed for JIRA request ${url} with error ${response.statusText}`)
 }
@@ -93,7 +93,7 @@ const run = async () => {
 
   const updateIssue = await updateIssueFixVersion(
     'FY-23471',
-    [{remove: {name: currentStandardRelease}}],
+    [{ add: { name: currentStandardRelease } }],
   )
   console.log('updateIssue', updateIssue)
 };
