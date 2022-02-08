@@ -59,13 +59,14 @@ const getIssueFixVersion = async (issueKey) => {
 }
 
 const updateIssueFixVersion = async (issueKey, fixVersions) => {
-
+  const body =  JSON.stringify({
+    update: { fixVersions }
+  });
+  console.log('request body', body);
   const response = await requestJira(
     `/issue/${issueKey}`,
     'PUT',
-    JSON.stringify({
-      update: { fixVersions }
-    }),
+    body,
   )
   return response
 }
