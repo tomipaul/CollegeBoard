@@ -19,7 +19,8 @@ const requestJira = async (url, method, body = undefined) => {
       'Content-Type': 'application/json'
     },
   })
-  if (response.ok && response.body) {
+  console.log('response body', response.body)
+  if (response.ok) {
     return await response.json();
   }
   core.setFailed(`Action failed for JIRA request ${url} with error ${response.statusText}`)
