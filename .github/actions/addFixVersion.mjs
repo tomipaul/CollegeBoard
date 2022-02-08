@@ -40,12 +40,20 @@ const getReleaseVersions = async () => {
   core.setFailed(`Action failed to get project versions with error ${response.statusText}`)
 }
 
+const getCurrentStandardRelease = (releases) => {
+  const currentStandardRelease = releases.find(({ name }) => /^release.*.0$/.test(name))
+  return currentStandardRelease.name
+}
+
 const run = async () => {
   const branch = await getBranch('dev')
   console.log('branch', branch)
 
   const releaseVersions = await getReleaseVersions()
   console.log('release versions', releaseVersions)
+
+  const currentStandardRelease = getCurrentStandardRelease(releaseVersions.values)
+  console.log('currentStandardRelease', currentStandardRelease)
 };
 
 run();
