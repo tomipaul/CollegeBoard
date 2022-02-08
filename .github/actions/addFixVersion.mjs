@@ -58,9 +58,7 @@ const getIssueFixVersion = async (issueKey) => {
   return response.fields.fixVersions
 }
 
-const updateIssueFixVersion = async (issueKey, versions) => {
-  const { add, remove } = versions
-  const fixVersions = [{ add }, { remove }]
+const updateIssueFixVersion = async (issueKey, fixVersions) => {
 
   const response = await requestJira(
     `/issue/${issueKey}`,
@@ -92,7 +90,7 @@ const run = async () => {
   const issue = await getIssueFixVersion('FY-23471')
   console.log('issue', issue)
 
-  const updateIssue = await updateIssueFixVersion('FY-23471', { remove: currentStandardRelease })
+  const updateIssue = await updateIssueFixVersion('FY-23471', [{ remove: currentStandardRelease }])
   console.log('updateIssue', updateIssue)
 };
 
