@@ -5,7 +5,23 @@ import core from '@actions/core';
 // const core = require('@actions/core')
 
 const octokit = github.getOctokit(process.env.GITHUB_TOKEN)
-const JIRA_SERVER_URL = "https://academicmerit.atlassian.net"
+const JIRA_SERVER_URL = "https://academicmerit.atlassian.net/rest/api/3"
+
+const requestJira = async (url, method) => {
+  const response = await fetch(`${JIRA_SERVER_URL}${url}`, {
+    method,
+    headers: {
+      'Authorization': `Basic ${Buffer.from(
+        `${process.env.JIRA_EMAIL}:${process.env.JIRA_TOKEN}`
+      ).toString('base64')}`,
+      'Accept': 'application/json'
+    }
+  })
+  if (response.ok) {
+    return await response.json();
+  }
+  core.setFailed(`Action failed for JIRA request ${url} with error ${response.statusText}`)
+}
 
 const getBranch = async (branch) => {
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/')
@@ -24,21 +40,17 @@ const getBranch = async (branch) => {
   }
 };
 
-const getReleaseVersions = async () => {
-  const response = await fetch(`${JIRA_SERVER_URL}/rest/api/3/project/FY/version?status=unreleased`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Basic ${Buffer.from(
-        `${process.env.JIRA_EMAIL}:${process.env.JIRA_TOKEN}`
-      ).toString('base64')}`,
-      'Accept': 'application/json'
-    }
-  })
-  if (response.ok) {
-    return await response.json();
-  }
-  core.setFailed(`Action failed to get project versions with error ${response.statusText}`)
-}
+const getUnreleasedVersions = async () =>
+  await requestJira(
+    '/project/FY/version?status=unreleased',
+    'GET',
+  )
+
+const getIssueFixVersion = async (issueKey) =>
+  await requestJira(
+    `/issue/${issueKey}?fields='Fix versions'`,
+    'GET',
+  )
 
 const getCurrentStandardRelease = (releases) => {
   const currentStandardRelease = releases.find(({ name }) => /^release.*.0$/.test(name))
@@ -49,11 +61,14 @@ const run = async () => {
   const branch = await getBranch('dev')
   console.log('branch', branch)
 
-  const releaseVersions = await getReleaseVersions()
+  const releaseVersions = await getUnreleasedVersions()
   console.log('release versions', releaseVersions)
 
   const currentStandardRelease = getCurrentStandardRelease(releaseVersions.values)
   console.log('currentStandardRelease', currentStandardRelease)
+
+  const issue = await getIssueFixVersion('FY-23471')
+  console.log('issue', issue)
 };
 
 run();
