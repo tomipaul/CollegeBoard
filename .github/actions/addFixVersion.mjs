@@ -20,6 +20,7 @@ const requestJira = async (url, method, body = undefined) => {
     },
   })
   if (response.ok) {
+    console.log(response.status)
     return response.status !== '204' ? await response.json() : null;
   }
   core.setFailed(`Action failed for JIRA request ${url} with error ${response.statusText}`)
