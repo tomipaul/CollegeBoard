@@ -7,15 +7,17 @@ import core from '@actions/core';
 const octokit = github.getOctokit(process.env.GITHUB_TOKEN)
 const JIRA_SERVER_URL = "https://academicmerit.atlassian.net/rest/api/3"
 
-const requestJira = async (url, method) => {
+const requestJira = async (url, method, body = undefined) => {
   const response = await fetch(`${JIRA_SERVER_URL}${url}`, {
     method,
+    body,
     headers: {
       'Authorization': `Basic ${Buffer.from(
         `${process.env.JIRA_EMAIL}:${process.env.JIRA_TOKEN}`
       ).toString('base64')}`,
-      'Accept': 'application/json'
-    }
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
   })
   if (response.ok) {
     return await response.json();
@@ -56,6 +58,20 @@ const getIssueFixVersion = async (issueKey) => {
   return response.fields.fixVersions
 }
 
+const updateIssueFixVersion = async (issueKey, versions) => {
+  const { add, remove } = versions
+  const fixVersions = [{ add }, { remove }]
+
+  const response = await requestJira(
+    `/issue/${issueKey}`,
+    'PUT',
+    JSON.stringify({
+      update: { fixVersions }
+    }),
+  )
+  return response
+}
+
 const getCurrentStandardRelease = (releases) => {
   const currentStandardRelease = releases.find(({ name }) => /^release.*.0$/.test(name))
   return currentStandardRelease.name
@@ -75,6 +91,9 @@ const run = async () => {
 
   const issue = await getIssueFixVersion('FY-23471')
   console.log('issue', issue)
+
+  const updateIssue = await updateIssueFixVersion('FY-23471', { remove: currentStandardRelease })
+  console.log('updateIssue', updateIssue)
 };
 
 run();
