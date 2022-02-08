@@ -91,7 +91,10 @@ const run = async () => {
   const issue = await getIssueFixVersion('FY-23471')
   console.log('issue', issue)
 
-  const updateIssue = await updateIssueFixVersion('FY-23471', [{ remove: currentStandardRelease }])
+  const updateIssue = await updateIssueFixVersion(
+    'FY-23471',
+    [{ remove: { name: currentStandardRelease } }]
+  )
   console.log('updateIssue', updateIssue)
 };
 
