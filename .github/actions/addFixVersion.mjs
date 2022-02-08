@@ -48,7 +48,7 @@ const getUnreleasedVersions = async () =>
 
 const getIssueFixVersion = async (issueKey) =>
   await requestJira(
-    `/issue/${issueKey}?fields='Fix versions'`,
+    `/issue/${issueKey}?fields=fixVersions`,
     'GET',
   )
 
