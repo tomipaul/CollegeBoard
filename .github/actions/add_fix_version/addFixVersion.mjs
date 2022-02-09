@@ -55,6 +55,7 @@ const getIssueFixVersion = async (issueKey) => {
     `/issue/${issueKey}?fields=fixVersions`,
     'GET',
   );
+  console.log('response.fields', response.fields)
   return response.fields.fixVersions
 }
 
