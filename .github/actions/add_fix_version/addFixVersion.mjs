@@ -134,9 +134,9 @@ const run = async () => {
   });
 };
 
-// run();
+run();
 
 // Test deployment
-(function test () {
-  console.log('Run successful');
-}());
+// (function test () {
+//   console.log('Run successful');
+// }());
