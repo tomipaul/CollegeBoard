@@ -1,8 +1,6 @@
 import fetch from 'node-fetch';
 import github from '@actions/github';
 import core from '@actions/core';
-// const github = require('@actions/github');
-// const core = require('@actions/core')
 
 const octokit = github.getOctokit(process.env.GITHUB_TOKEN)
 const JIRA_SERVER_URL = "https://academicmerit.atlassian.net/rest/api/3"
@@ -88,7 +86,8 @@ const getIssuesFromCommits = (commits) => {
 
 const run = async () => {
   const releaseVersions = await getUnreleasedVersions();
-  const currentStandardRelease = getCurrentStandardRelease(releaseVersions);
+  const releaseNextVersion = 'release-next';
+  const currentStandardRelease = getCurrentStandardRelease(releaseVersions) || releaseNextVersion;
   const actionBranch = process.env.GITHUB_REF_NAME;
   const releaseBranch = actionBranch.startsWith("release-") ?
     actionBranch : (await getBranch('release-candidate') || await getBranch(currentStandardRelease));
@@ -110,29 +109,24 @@ const run = async () => {
       const issueFixVersion = await getIssueFixVersion(issue);
       const hasCurrentFixVersion = issueFixVersion.some(({ name }) => name === currentStandardRelease)
       if (!hasCurrentFixVersion) {
-        updateIssueFixVersion(issue, [{ add: { name: 'release-next' } }])
+        updateIssueFixVersion(issue, [{ add: { name: releaseNextVersion } }])
       }
     }));
   }
 
   /*
-  if branch is not master, it is release
-  Add release version and remove release next from issue if exists
+  if action branch is not master, it is release.
+  Add standard release version and remove release next from issue if exists
   */
   return await Promise.all(issues.map(async (issue) => {
     const issueFixVersion = await getIssueFixVersion(issue);
-    const hasReleaseNextVersion = issueFixVersion.some(({ name }) => name === 'release-next')
+    const hasReleaseNextVersion = issueFixVersion.some(({ name }) => name === releaseNextVersion)
     const fixVersionsUpdate = [{ add: { name: currentStandardRelease } }]
     if (hasReleaseNextVersion) {
-      fixVersionsUpdate.push({ remove: { name: 'release-next' } })
+      fixVersionsUpdate.push({ remove: { name: releaseNextVersion } })
     }
     updateIssueFixVersion(issue, fixVersionsUpdate);
   }));
 };
 
 run();
-
-// Test deployment
-// (function test () {
-//   console.log('Run successful');
-// }());
