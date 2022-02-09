@@ -86,7 +86,7 @@ const getIssuesFromCommits = (commits) => {
 
 const run = async () => {
   const releaseVersions = await getUnreleasedVersions();
-  const releaseNextVersion = 'release-next';
+  const releaseNextVersion = 'Release Next';
   const currentStandardRelease = getCurrentStandardRelease(releaseVersions) || releaseNextVersion;
   const actionBranch = process.env.GITHUB_REF_NAME;
   const releaseBranch = actionBranch.startsWith("release-") ?
