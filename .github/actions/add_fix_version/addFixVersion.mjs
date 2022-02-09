@@ -55,7 +55,6 @@ const getIssueFixVersion = async (issueKey) => {
     `/issue/${issueKey}?fields=fixVersions`,
     'GET',
   );
-  core.info(response.fields)
   return response.fields.fixVersions
 }
 
@@ -108,7 +107,7 @@ const run = async () => {
     If not tag issue with release-next
     */
     return issues.forEach((issue) => {
-      const issueFixVersion = getIssueFixVersion(issue)
+      const issueFixVersion = await getIssueFixVersion(issue)
       const hasCurrentFixVersion = issueFixVersion.some(({ name }) => name === currentStandardRelease)
       if (!hasCurrentFixVersion) {
         updateIssueFixVersion(issue, [{ add: { name: 'release-next' } }])
@@ -121,7 +120,7 @@ const run = async () => {
   Remove release next from issue and add release version
   */
   return issues.forEach((issue) => {
-    const issueFixVersion = getIssueFixVersion(issue)
+    const issueFixVersion = await getIssueFixVersion(issue)
     console.log('issue fix version', issueFixVersion)
     const hasReleaseNextVersion = issueFixVersion.some(({ name }) => name === 'release-next')
     if (hasReleaseNextVersion) {
