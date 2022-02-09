@@ -18,15 +18,15 @@ const requestJira = async (url, method, body = undefined) => {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     },
-  })
+  });
   if (response.ok) {
     return response.status !== 204 ? await response.json() : null;
   }
-  core.setFailed(`Action failed for JIRA request ${url} with error ${response.statusText}`)
+  core.setFailed(`Action failed for JIRA request ${url} with error ${response.statusText}`);
 }
 
 const getBranch = async (branch) => {
-  const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/')
+  const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
   try {
     const response = await octokit.rest.repos.getBranch({
       owner,
@@ -36,9 +36,9 @@ const getBranch = async (branch) => {
     return response
   } catch (err) {
     if (err.message === "Branch not found") {
-      return undefined
+      return undefined;
     }
-    core.setFailed(`Action failed to get branch with error ${err}`)
+    core.setFailed(`Action failed to get branch with error ${err}`);
   }
 };
 
@@ -46,7 +46,7 @@ const getUnreleasedVersions = async () => {
   const response = await requestJira(
     '/project/FY/version?status=unreleased',
     'GET',
-  )
+  );
   return response.values
 }
 
@@ -54,7 +54,7 @@ const getIssueFixVersion = async (issueKey) => {
   const response = await requestJira(
     `/issue/${issueKey}?fields=fixVersions`,
     'GET',
-  )
+  );
   return response.fields.fixVersions
 }
 
@@ -66,34 +66,77 @@ const updateIssueFixVersion = async (issueKey, fixVersions) => {
     `/issue/${issueKey}`,
     'PUT',
     body,
-  )
+  );
   return response
 }
 
 const getCurrentStandardRelease = (releases) => {
-  const currentStandardRelease = releases.find(({ name }) => /^release.*.0$/.test(name))
+  const currentStandardRelease = releases.find(({ name }) => /^release.*.0$/i.test(name))
   return currentStandardRelease.name
 }
 
+const getIssuesFromCommits = (commits) => {
+  const issues = [];
+  commits.forEach(({ message }) => {
+    const matches = message.match(/(FY|PREAP|TI)-\d+/ig);
+    if (matches) {
+      issues.push(...matches)
+    }
+  })
+  return new Set(issues)
+}
+
 const run = async () => {
-  // const branch = await getBranch('dev')
-  // console.log('branch', branch)
-  const event = github.context
-  console.log('event', event.payload.commits)
+  const releaseVersions = await getUnreleasedVersions();
+  const currentStandardRelease = getCurrentStandardRelease(releaseVersions);
+  const actionBranch = process.env.GITHUB_REF_NAME;
+  const releaseBranch = actionBranch.startsWith("release-") ?
+    actionBranch : (await getBranch('release-candidate') || await getBranch(currentStandardRelease));
+  const commits = github.context.payload.commits
+  const issues = getIssuesFromCommits(commits)
 
-  const releaseVersions = await getUnreleasedVersions()
-  console.log('release versions', releaseVersions)
+  if (actionBranch === 'master' && !releaseBranch) {
+    return issues.forEach((issue) =>
+      updateIssueFixVersion(issue, [{ add: { name: currentStandardRelease } }])
+    )
+  }
+  
+  if (actionBranch === 'master' && !!releaseBranch) {
+    /*
+    Check if issue has fix version in case it was merged to RC first
+    If not tag issue with release-next
+    */
+    return issues.forEach((issue) => {
+      const issueFixVersion = getIssueFixVersion(issue)
+      const hasCurrentFixVersion = issueFixVersion.some(({ name }) => name === currentStandardRelease)
+      if (!hasCurrentFixVersion) {
+        updateIssueFixVersion(issue, [{ add: { name: 'release-next' } }])
+      }
+    })
+  }
 
-  const currentStandardRelease = getCurrentStandardRelease(releaseVersions)
-  console.log('currentStandardRelease', currentStandardRelease)
-
-  const issue = await getIssueFixVersion('FY-23471')
-  console.log('issue', issue)
-
-  await updateIssueFixVersion(
-    'FY-23471',
-    [{ add: { name: currentStandardRelease } }],
-  )
+  /*
+  if branch is not master, it is release
+  Remove release next from issue and add release version
+  */
+  return issues.forEach((issue) => {
+    const issueFixVersion = getIssueFixVersion(issue)
+    const hasReleaseNextVersion = issueFixVersion.some(({ name }) => name === 'release-next')
+    if (hasReleaseNextVersion) {
+      updateIssueFixVersion(
+        issue,
+        [
+          { remove: { name: 'release-next' } },
+          { add: { name: currentStandardRelease } }
+        ]
+      );
+    }
+  });
 };
 
-run();
+// run();
+
+// Test deployment
+(function test () {
+  console.log('Run successful');
+}());

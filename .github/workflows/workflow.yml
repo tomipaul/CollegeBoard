@@ -15,9 +15,9 @@ jobs:
         with:
           node-version: '16'
       - run: npm install @actions/github @actions/core node-fetch
-      - run: node ./.github/actions/addFixVersion.mjs
+      # - run: node ./.github/actions/addFixVersion.mjs
+      - uses: ./.github/actions
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
           JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
-      # - uses: ./.github/actions
