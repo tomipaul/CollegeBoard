@@ -109,6 +109,7 @@ const run = async () => {
     */
     return issues.forEach((issue) => {
       const issueFixVersion = getIssueFixVersion(issue)
+      console.log('issue fix version', issueFixVersion)
       const hasCurrentFixVersion = issueFixVersion.some(({ name }) => name === currentStandardRelease)
       if (!hasCurrentFixVersion) {
         updateIssueFixVersion(issue, [{ add: { name: 'release-next' } }])
