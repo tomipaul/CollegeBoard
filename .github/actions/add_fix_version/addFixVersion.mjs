@@ -83,7 +83,7 @@ const getIssuesFromCommits = (commits) => {
       issues.push(...matches)
     }
   })
-  return new Set(issues)
+  return Array.from(new Set(issues))
 }
 
 const run = async () => {
