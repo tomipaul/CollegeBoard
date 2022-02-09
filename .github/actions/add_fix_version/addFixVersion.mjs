@@ -96,9 +96,9 @@ const run = async () => {
   const issues = getIssuesFromCommits(commits)
 
   if (actionBranch === 'master' && !releaseBranch) {
-    return issues.forEach((issue) =>
+    return await Promise.all(issues.map((issue) =>
       updateIssueFixVersion(issue, [{ add: { name: currentStandardRelease } }])
-    )
+    ))
   }
   
   if (actionBranch === 'master' && !!releaseBranch) {
@@ -106,21 +106,21 @@ const run = async () => {
     Check if issue has fix version in case it was merged to RC first
     If not tag issue with release-next
     */
-    return issues.forEach((issue) => {
-      const issueFixVersion = await getIssueFixVersion(issue)
+    return await Promise.all(issues.map(async (issue) => {
+      const issueFixVersion = await getIssueFixVersion(issue);
       const hasCurrentFixVersion = issueFixVersion.some(({ name }) => name === currentStandardRelease)
       if (!hasCurrentFixVersion) {
         updateIssueFixVersion(issue, [{ add: { name: 'release-next' } }])
       }
-    })
+    }));
   }
 
   /*
   if branch is not master, it is release
   Remove release next from issue and add release version
   */
-  return issues.forEach((issue) => {
-    const issueFixVersion = await getIssueFixVersion(issue)
+  return await Promise.all(issues.map(async (issue) => {
+    const issueFixVersion = await getIssueFixVersion(issue);
     console.log('issue fix version', issueFixVersion)
     const hasReleaseNextVersion = issueFixVersion.some(({ name }) => name === 'release-next')
     if (hasReleaseNextVersion) {
@@ -132,7 +132,7 @@ const run = async () => {
         ]
       );
     }
-  });
+  }));
 };
 
 run();
