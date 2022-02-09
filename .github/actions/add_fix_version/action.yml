@@ -1,0 +1,5 @@
+name: 'add_fix_version'
+description: 'Add fix version to associated JIRA issue'
+runs:
+  using: 'node16'
+  main: 'addFixVersion.mjs'

@@ -1,0 +1,21 @@
+name: Add fix version to issue
+on:
+  push:
+    branches:
+      - master
+      - 'release-**'
+
+jobs:
+  tag_issue_with_fix_version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - run: npm install @actions/github @actions/core node-fetch
+      - uses: ./.github/actions/add_fix_version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
