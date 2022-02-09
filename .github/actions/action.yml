@@ -1,6 +1,0 @@
-name: 'add_fix_version'
-description: 'Add fix version to associated JIRA ticket'
-runs:
-  using: 'node16'
-  # pre: 'npm install axios'
-  main: 'addFixVersion.mjs'
