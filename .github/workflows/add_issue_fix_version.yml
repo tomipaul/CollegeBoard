@@ -1,4 +1,4 @@
-name: Add fix version to issue 
+name: Add fix version to issue
 on:
   push:
     branches:
