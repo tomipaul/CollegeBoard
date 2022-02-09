@@ -94,6 +94,7 @@ const run = async () => {
     actionBranch : (await getBranch('release-candidate') || await getBranch(currentStandardRelease));
   const commits = github.context.payload.commits
   const issues = getIssuesFromCommits(commits)
+  console.log('issues', issues)
 
   if (actionBranch === 'master' && !releaseBranch) {
     return await Promise.all(issues.map((issue) =>
