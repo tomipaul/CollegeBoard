@@ -94,7 +94,6 @@ const run = async () => {
     actionBranch : (await getBranch('release-candidate') || await getBranch(currentStandardRelease));
   const commits = github.context.payload.commits
   const issues = getIssuesFromCommits(commits)
-  console.log('issues', issues)
 
   if (actionBranch === 'master' && !releaseBranch) {
     return await Promise.all(issues.map((issue) =>
@@ -118,21 +117,16 @@ const run = async () => {
 
   /*
   if branch is not master, it is release
-  Remove release next from issue and add release version
+  Add release version and remove release next from issue if exists
   */
   return await Promise.all(issues.map(async (issue) => {
     const issueFixVersion = await getIssueFixVersion(issue);
-    console.log('issue fix version', issueFixVersion)
     const hasReleaseNextVersion = issueFixVersion.some(({ name }) => name === 'release-next')
+    const fixVersionsUpdate = [{ add: { name: currentStandardRelease } }]
     if (hasReleaseNextVersion) {
-      updateIssueFixVersion(
-        issue,
-        [
-          { remove: { name: 'release-next' } },
-          { add: { name: currentStandardRelease } }
-        ]
-      );
+      fixVersionsUpdate.push({ remove: { name: 'release-next' } })
     }
+    updateIssueFixVersion(issue, fixVersionsUpdate);
   }));
 };
 
